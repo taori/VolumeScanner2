@@ -42,11 +42,10 @@ namespace VolumeScanner2.Proxies
 			remove { _controller.Canceled -= value; }
 		}
 
-		public Task CloseAsync()
+		public async Task CloseAsync()
 		{
 			if (_controller.IsOpen)
-				return _controller.CloseAsync();
-			return Task.CompletedTask;
+				await _controller.CloseAsync();
 		}
 
 		public void SetTitle(string title)

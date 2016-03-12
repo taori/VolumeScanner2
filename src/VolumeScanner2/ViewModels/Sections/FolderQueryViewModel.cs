@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Permissions;
@@ -13,6 +14,7 @@ using VolumeScanner.BusinessObjects;
 using VolumeScanner2.Caliburn;
 using VolumeScanner2.Extensions;
 using VolumeScanner2.Framework;
+using VolumeScanner2.Helpers;
 using VolumeScanner2.Interfaces;
 using VolumeScanner2.Resources;
 using Action = System.Action;
@@ -82,7 +84,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 						try
 						{
-							var vm = await Task.Run(() => BuildNode(ScanPath, cts.Token, progressController));
+							var vm = await Task.Run(() => BuildNode(ScanPath, cts.Token, progressController), cts.Token);
 
 							Source = vm;
 						}
@@ -111,13 +113,13 @@ namespace VolumeScanner2.ViewModels.Sections
 				}
 			}
 		}
-
+		
 		private FileInformationViewModel BuildNode(string scanPath, CancellationToken cancellationToken, IProgressController progress)
 		{
-			var filePaths = Directory.GetFiles(scanPath, "*", SearchOption.AllDirectories);
-			var directories = Directory.GetDirectories(scanPath, "*", SearchOption.AllDirectories);
-			var fileCount = filePaths.Length;
-			var directoryCount = directories.Length;
+			var filePaths = IoHelper.GetAllFilesRecursive(scanPath).ToList();
+			var directories = IoHelper.GetAllDirectoriesRecursive(scanPath).ToList();
+			var fileCount = filePaths.Count;
+			var directoryCount = directories.Count;
 			var maxCount = fileCount + directoryCount;
 
 			progress.Minimum = 1;
@@ -152,8 +154,8 @@ namespace VolumeScanner2.ViewModels.Sections
 				{
 					progress();
 
-					if (failedSystemCheck || fileSystemInfo.Attributes.HasFlag(FileAttributes.System))
-						continue;
+//					if (failedSystemCheck)
+//						continue;
 
 					cancellationToken.ThrowIfCancellationRequested();
 					try

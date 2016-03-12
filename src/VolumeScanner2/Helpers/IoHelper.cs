@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -42,6 +43,54 @@ namespace VolumeScanner2.Helpers
 					Directory.CreateDirectory(path);
 				}
 			});
+		}
+
+		public static IEnumerable<string> GetAllDirectoriesRecursive(string scanPath)
+		{
+			string[] directories;
+			try
+			{
+				directories = Directory.GetDirectories(scanPath, "*", SearchOption.TopDirectoryOnly);
+			}
+			catch (UnauthorizedAccessException e)
+			{
+				yield break;
+			}
+
+			foreach (var item in directories)
+			{
+				yield return item;
+				foreach (var recursionItem in GetAllDirectoriesRecursive(item))
+				{
+					yield return recursionItem;
+				}
+			}
+		}
+
+		public static IEnumerable<string> GetAllFilesRecursive(string scanPath)
+		{
+			string[] directories;
+			try
+			{
+				directories = Directory.GetDirectories(scanPath, "*", SearchOption.TopDirectoryOnly);
+			}
+			catch (UnauthorizedAccessException e)
+			{
+				yield break;
+			}
+
+			foreach (var item in directories)
+			{
+				foreach (var recursionItem in GetAllFilesRecursive(item))
+				{
+					yield return recursionItem;
+				}
+			}
+
+			foreach (var item in Directory.GetFiles(scanPath, "*", SearchOption.TopDirectoryOnly))
+			{
+				yield return item;
+			}
 		}
 	}
 }
