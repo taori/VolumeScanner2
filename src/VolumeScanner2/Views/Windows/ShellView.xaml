@@ -1,0 +1,39 @@
+<controls:MetroWindow x:Class="VolumeScanner2.Views.Windows.ShellView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:windows="clr-namespace:VolumeScanner2.ViewModels.Windows"
+        mc:Ignorable="d"
+		cal:Bind.AtDesignTime="True"
+		xmlns:fa="http://schemas.fontawesome.io/icons/"
+		xmlns:resources="clr-namespace:VolumeScanner2.Resources"
+		d:DataContext="{d:DesignInstance Type=windows:ShellViewModel, IsDesignTimeCreatable=True}"
+		d:DesignHeight="300"
+        Title="MainWindow" Height="700" Width="1024">
+	<Border Padding="{StaticResource WindowPadding}" >
+		<DockPanel>
+			<Button DockPanel.Dock="Bottom" Content="{x:Static resources:ApplicationTranslations.ButtonNewQuery}" cal:Message.Attach="NewFolderQuery"></Button>
+			<TabControl x:Name="Items" controls:TabControlHelper.IsUnderlined="True" Padding="0,5,0,5">
+				<TabControl.ItemTemplate>
+					<DataTemplate>
+						<Border>
+							<StackPanel Orientation="Horizontal">
+								<TextBlock FontSize="20" Text="{Binding Path=DisplayName}"></TextBlock>
+								<Button cal:Message.Attach="CloseQuery($dataContext)">
+									<Button.Template>
+										<ControlTemplate>
+											<fa:ImageAwesome Foreground="Red" Icon="Close" Height="15" Margin="5,2,5,0" ></fa:ImageAwesome>
+										</ControlTemplate>
+									</Button.Template>
+								</Button>
+							</StackPanel>
+						</Border>
+					</DataTemplate>
+				</TabControl.ItemTemplate>
+			</TabControl>
+		</DockPanel>
+	</Border>
+</controls:MetroWindow>

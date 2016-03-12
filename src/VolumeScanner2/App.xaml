@@ -1,0 +1,33 @@
+﻿<Application x:Class="VolumeScanner2.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:VolumeScanner2"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:converters="clr-namespace:VolumeScanner2.Framework.Converters"
+             xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Cyan.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+                <ResourceDictionary Source="Resources/Icons.xaml" />
+                <ResourceDictionary Source="Resources/CustomStyles.xaml" />
+				<ResourceDictionary>
+					<local:AppBootstrapper x:Key="Bootstrapper"></local:AppBootstrapper>
+<!--					<Style TargetType="dialogs:BaseMetroDialog">-->
+<!--					</Style>-->
+<!--					<Style x:Key="MetroValidationPopup"  TargetType="{x:Type controls:CustomValidationPopup}">-->
+<!--						<Setter Property="HorizontalAlignment" Value="Right" />-->
+<!--						<Setter Property="HorizontalOffset" Value="0" />-->
+<!--						<Setter Property="VerticalOffset" Value="0" />-->
+<!--						<Setter Property="PopupAnimation" Value="Fade" />-->
+<!--						<Setter Property="Placement" Value="Right" />-->
+<!--					</Style>-->
+				</ResourceDictionary>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+    </Application.Resources>
+</Application>
