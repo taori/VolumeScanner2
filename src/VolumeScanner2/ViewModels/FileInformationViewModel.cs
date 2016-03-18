@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 using Caliburn.Micro;
 using FontAwesome.WPF;
 using VolumeScanner.BusinessObjects;
 using VolumeScanner2.Caliburn;
+using ZetaLongPaths;
 
 namespace VolumeScanner2.ViewModels
 {
@@ -49,7 +51,7 @@ namespace VolumeScanner2.ViewModels
 	[DebuggerDisplay("{Name} {Size}")]
 	public class FileInformationViewModel : PropertyChangedValidationBase
 	{
-		public FileInfo FileInfo { get; }
+		public ZlpFileInfo FileInfo { get; }
 
 		public string FormattedSize => $"{Size.MegaBytes.ToString("00000.00")} MB";
 
@@ -65,7 +67,7 @@ namespace VolumeScanner2.ViewModels
 
 		public FileInformationViewModel() {}
 
-		public FileInformationViewModel(FileInfo fi)
+		public FileInformationViewModel(ZlpFileInfo fi)
 		{
 			FileInfo = fi;
 			Type = File.GetAttributes(fi.FullName).HasFlag(FileAttributes.Directory) ? FileInformationType.Directory : FileInformationType.File;
@@ -103,19 +105,25 @@ namespace VolumeScanner2.ViewModels
 
 		public void ExpandRecursive()
 		{
+			if (this.Type != FileInformationType.Directory)
+				return;
+
 			IsExpanded = true;
 			foreach (var child in Children)
 			{
-				child.ExpandRecursive();
+				Task.Run(() => child.ExpandRecursive());
 			}
 		}
 
 		public void CollapseRecursive()
 		{
+			if (this.Type != FileInformationType.Directory)
+				return;
+
 			IsExpanded = false;
 			foreach (var child in Children)
 			{
-				child.CollapseRecursive();
+				Task.Run(() => child.CollapseRecursive());
 			}
 		}
 	}

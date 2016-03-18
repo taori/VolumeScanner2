@@ -53,14 +53,24 @@ namespace VolumeScanner2.Proxies
 			_controller.SetTitle(title);
 		}
 
-		public void SetMessage(string message)
+		private DateTime _lastMessage = DateTime.MinValue;
+		public void SetMessage(string message, TimeSpan minDelay = default(TimeSpan))
 		{
-			_controller.SetMessage(message);
+			if (_lastMessage + minDelay < DateTime.Now)
+			{
+				_lastMessage = DateTime.Now;
+				_controller.SetMessage(message);
+			}
 		}
 
-		public void SetProgress(double progress)
+		private DateTime _lastProgress = DateTime.MinValue;
+		public void SetProgress(double progress, TimeSpan minDelay = default(TimeSpan))
 		{
-			_controller.SetProgress(progress);
+			if (_lastProgress + minDelay < DateTime.Now)
+			{
+				_lastProgress = DateTime.Now;
+				_controller.SetProgress(progress);
+			}
 		}
 
 		public void SetCancelable(bool cancelable)

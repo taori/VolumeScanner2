@@ -34,9 +34,9 @@
 					<WrapPanel>
 						<WrapPanel.ContextMenu>
 							<ContextMenu>
-								<MenuItem cal:Message.Attach="ExpandRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveExpand}"></MenuItem>
-								<MenuItem cal:Message.Attach="CollapseRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveCollapse}"></MenuItem>
-								<MenuItem cal:Message.Attach="OpenInExplorer" Header="{x:Static resources:ApplicationTranslations.TreeOpenInExplorer}"></MenuItem>
+								<MenuItem cal:Message.Attach="ExpandRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveExpand}" Visibility="Collapsed" />
+								<MenuItem cal:Message.Attach="CollapseRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveCollapse}" />
+								<MenuItem cal:Message.Attach="OpenInExplorer" Header="{x:Static resources:ApplicationTranslations.TreeOpenInExplorer}" />
 							</ContextMenu>
 						</WrapPanel.ContextMenu>
 						<fa:ImageAwesome

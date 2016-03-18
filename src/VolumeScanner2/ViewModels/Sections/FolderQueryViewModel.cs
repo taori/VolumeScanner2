@@ -17,6 +17,7 @@ using VolumeScanner2.Framework;
 using VolumeScanner2.Helpers;
 using VolumeScanner2.Interfaces;
 using VolumeScanner2.Resources;
+using ZetaLongPaths;
 using Action = System.Action;
 
 namespace VolumeScanner2.ViewModels.Sections
@@ -28,6 +29,17 @@ namespace VolumeScanner2.ViewModels.Sections
 		public FolderQueryViewModel()
 		{
 			IsScanning = false;
+		}
+
+		protected override void OnDeactivate(bool close)
+		{
+			base.OnDeactivate(close);
+
+			if (close)
+			{
+				this.ExceptionMessages = null;
+				this.Source = null;
+			}
 		}
 
 		public void CancelScan()
@@ -84,7 +96,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 						try
 						{
-							var vm = await Task.Run(() => BuildNode(ScanPath, cts.Token, progressController), cts.Token);
+							var vm = await Task.Run(() => BuildRootNode(ScanPath, cts.Token, progressController), cts.Token);
 
 							Source = vm;
 						}
@@ -114,64 +126,88 @@ namespace VolumeScanner2.ViewModels.Sections
 			}
 		}
 		
-		private FileInformationViewModel BuildNode(string scanPath, CancellationToken cancellationToken, IProgressController progress)
+		private FileInformationViewModel BuildRootNode(string scanPath, CancellationToken cancellationToken, IProgressController progress)
 		{
 			var filePaths = IoHelper.GetAllFilesRecursive(scanPath).ToList();
-			var directories = IoHelper.GetAllDirectoriesRecursive(scanPath).ToList();
+
+			progress.Minimum = 0;
+			progress.Maximum = filePaths.Count;
+			progress.SetTitle("Dateigröße wird abgerufen.");
+			
+			var fileSizes = new Dictionary<string, long>();
 			var fileCount = filePaths.Count;
-			var directoryCount = directories.Count;
-			var maxCount = fileCount + directoryCount;
 
-			progress.Minimum = 1;
-			progress.Maximum = maxCount;
+			TimeSpan displayDelay = TimeSpan.FromMilliseconds(200);
 
-			var rootFileInfo = new FileInfo(scanPath);
+			for (int index = 0; index < fileCount; index++)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				progress.SetMessage($"Datei: {index} / {fileCount}", displayDelay);
+				progress.SetProgress(index, displayDelay);
+				var filePath = filePaths[index];
+				if (!ZlpIOHelper.FileExists(filePath))
+					continue;
+					
+				fileSizes.Add(filePath, new ZlpFileInfo(filePath).Length);
+			}
+			
+
+			var rootFileInfo = new ZlpFileInfo(scanPath);
 			var rootNode = new FileInformationViewModel(rootFileInfo);
 
-			var currentProgress = 1;
-			progress.SetTitle("Erstellen der Knoten");
-			progress.SetMessage($"Anzahl Dateien: {maxCount}");
-			AddNodesRecursive(rootNode, cancellationToken, () =>
+			int currentProgress = 0;
+			progress.SetTitle("Dateibaum wird aufgebaut.");
+			progress.SetProgress(0);
+			progress.Maximum = filePaths.Count;
+
+			var progressDelay = TimeSpan.FromMilliseconds(500);
+			AddNodesRecursive(rootNode, fileSizes, cancellationToken, () =>
 			{
-				progress.SetProgress(currentProgress++);
+				progress.SetProgress(currentProgress++, progressDelay);
+				progress.SetMessage($"Datei {currentProgress} / {filePaths.Count}", progressDelay);
 			});
 
 			return rootNode;
 		}
 
-		private static bool failedSystemCheck = false;
-
-		private void AddNodesRecursive(FileInformationViewModel node, CancellationToken cancellationToken, Action progress)
+		private void AddNodesRecursive(FileInformationViewModel currentNode, Dictionary<string, long> fileSizes, CancellationToken cancellationToken, Action progress)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
-			if (node.Type == FileInformationType.Directory)
+			if (currentNode.Type == FileInformationType.Directory)
 			{
-				var directoryInfo = new DirectoryInfo(node.FileInfo.FullName);
-				FileSystemInfo[] fileInfos = directoryInfo.GetFileSystemInfos();
+				var directoryInfo =  new ZlpDirectoryInfo(currentNode.FileInfo.FullName);
 
-				foreach (FileSystemInfo fileSystemInfo in fileInfos)
+				foreach (var fileInfo in directoryInfo.GetFiles())
 				{
 					progress();
+					
+					long size;
+					size = fileSizes.TryGetValue(fileInfo.FullName, out size) ? size : 0;
+					var localFile = new FileInformationViewModel(fileInfo);
 
-//					if (failedSystemCheck)
-//						continue;
+					currentNode.Children.Add(localFile);
+					localFile.Size = new ByteSize(size);
+				}
 
+				foreach (var fileSystemInfo in directoryInfo.GetDirectories())
+				{
 					cancellationToken.ThrowIfCancellationRequested();
 					try
 					{
-						var subNode = new FileInformationViewModel(new FileInfo(fileSystemInfo.FullName));
-						node.Children.Add(subNode);
-						AddNodesRecursive(subNode, cancellationToken, progress);
+						var subNode = new FileInformationViewModel(new ZlpFileInfo(fileSystemInfo.FullName));
+						currentNode.Children.Add(subNode);
+						AddNodesRecursive(subNode, fileSizes, cancellationToken, progress);
 
-						var currentOrder = node.Children.ToArray();
+						var currentOrder = currentNode.Children.ToArray();
 
-						node.Children.Clear();
-						node.Children.AddRange(currentOrder.OrderByDescending(d => d.Size));
+						currentNode.Children.Clear();
+						currentNode.Children.AddRange(currentOrder.OrderByDescending(d => d.Size));
 					}
 					catch (UnauthorizedAccessException e)
 					{
-						failedSystemCheck = true;
+						ExceptionMessages.Add($"Zugriff verweigert: {fileSystemInfo.FullName}");
 					}
 					catch (PathTooLongException e)
 					{
@@ -183,11 +219,7 @@ namespace VolumeScanner2.ViewModels.Sections
 					}
 				}
 
-				node.Size = new ByteSize(node.Children.Sum(s => s.Size.Bytes));
-			}
-			else
-			{
-				node.Size = new ByteSize(node.FileInfo.Length);
+				currentNode.Size = new ByteSize(currentNode.Children.Sum(s => s.Size.Bytes));
 			}
 		}
 

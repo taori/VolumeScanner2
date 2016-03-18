@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace VolumeScanner2.Helpers
@@ -50,7 +51,7 @@ namespace VolumeScanner2.Helpers
 			string[] directories;
 			try
 			{
-				directories = Directory.GetDirectories(scanPath, "*", SearchOption.TopDirectoryOnly);
+				directories = SafeGetDirectories(scanPath);
 			}
 			catch (UnauthorizedAccessException e)
 			{
@@ -72,7 +73,7 @@ namespace VolumeScanner2.Helpers
 			string[] directories;
 			try
 			{
-				directories = Directory.GetDirectories(scanPath, "*", SearchOption.TopDirectoryOnly);
+				directories = SafeGetDirectories(scanPath);
 			}
 			catch (UnauthorizedAccessException e)
 			{
@@ -87,10 +88,31 @@ namespace VolumeScanner2.Helpers
 				}
 			}
 
-			foreach (var item in Directory.GetFiles(scanPath, "*", SearchOption.TopDirectoryOnly))
+			foreach (var item in SafeGetFiles(scanPath))
 			{
 				yield return item;
 			}
+		}
+
+		private static string[] SafeGetFiles(string scanPath)
+		{
+			return ZetaLongPaths.ZlpIOHelper.GetFiles(scanPath, SearchOption.TopDirectoryOnly).Select(s => s.FullName).ToArray();
+//			return Directory.GetFiles(scanPath, "*", SearchOption.TopDirectoryOnly);
+		}
+
+		private static string[] SafeGetDirectories(string scanPath)
+		{
+//			Directory.SetCurrentDirectory(scanPath);
+//			var moddedPath = scanPath;
+			var moddedPath = "\\\\?\\UNC\\"+scanPath;
+
+			var directories = ZetaLongPaths.ZlpIOHelper.GetDirectories(scanPath).Select(s => s.FullName).ToArray();
+//			var directories = d.EnumerateDirectories().Select(s => s.FullName).ToArray();
+//			var directories = Directory.EnumerateDirectories(moddedPath).ToArray();
+//			var directories = Directory.GetDirectories(moddedPath, "*", SearchOption.TopDirectoryOnly);
+//			Directory.SetCurrentDirectory(prev);
+
+			return directories;
 		}
 	}
 }

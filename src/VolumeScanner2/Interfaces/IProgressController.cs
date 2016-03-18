@@ -13,8 +13,8 @@ namespace VolumeScanner2.Interfaces
 		event EventHandler Canceled;
 		Task CloseAsync();
 		void SetTitle(string title);
-		void SetMessage(string message);
-		void SetProgress(double progress);
+		void SetMessage(string message, TimeSpan minDelay = default(TimeSpan));
+		void SetProgress(double progress, TimeSpan minDelay = default(TimeSpan));
 		void SetCancelable(bool cancelable);
 		void SetIndeterminate();
 	}
