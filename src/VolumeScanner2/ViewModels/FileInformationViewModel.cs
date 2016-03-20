@@ -53,7 +53,7 @@ namespace VolumeScanner2.ViewModels
 	[DebuggerDisplay("{Name} {Size}")]
 	public class FileInformationViewModel : PropertyChangedValidationBase
 	{
-		public readonly FileQueryCache QueryInformation;
+		public readonly FileQueryCache Cache;
 
 		private readonly ZlpFileInfo _fileInfo;
 
@@ -73,9 +73,9 @@ namespace VolumeScanner2.ViewModels
 
 		public FileInformationViewModel() {}
 
-		public FileInformationViewModel(ZlpFileInfo fileInformation, FileQueryCache queryInformation)
+		public FileInformationViewModel(ZlpFileInfo fileInformation, FileQueryCache cache)
 		{
-			QueryInformation = queryInformation;
+			Cache = cache;
 			_fileInfo = fileInformation;
 			Type = File.GetAttributes(fileInformation.FullName).HasFlag(FileAttributes.Directory) ? FileInformationType.Directory : FileInformationType.File;
 			Name = Path.GetFileName(_fileInfo.FullName);
@@ -102,8 +102,23 @@ namespace VolumeScanner2.ViewModels
 		public bool IsExpanded
 		{
 			get { return _isExpanded; }
-			set { SetValue(ref _isExpanded, value, nameof(IsExpanded), validate:false); }
+			set
+			{
+				LoadIfRequired(value);
+				SetValue(ref _isExpanded, value, nameof(IsExpanded), validate:false);
+			}
 		}
+
+		private void LoadIfRequired(bool expand)
+		{
+			if (IsLoaded || !expand)
+				return;
+
+			FileInformationExpander.ExpandFolder(this, Cache, 0);
+			IsLoaded = true;
+		}
+
+		public bool IsLoaded { get; set; }
 
 		public void OpenInExplorer()
 		{

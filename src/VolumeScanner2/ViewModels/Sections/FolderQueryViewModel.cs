@@ -28,11 +28,6 @@ namespace VolumeScanner2.ViewModels.Sections
 	{
 		public int Order { get; set; }
 
-		public FolderQueryViewModel()
-		{
-			IsScanning = false;
-		}
-
 		protected override void OnDeactivate(bool close)
 		{
 			base.OnDeactivate(close);
@@ -86,9 +81,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 					ApplicationSettings.Default.LastQueryPath = ScanPath;
 					ApplicationSettings.Default.Save();
-
-					IsScanning = true;
-
+					
 					DisplayName = dialog.SelectedPath.Length <= 30 ? dialog.SelectedPath : dialog.SelectedPath.Substring(0, 30) + " ...";
 
 					using (var cts = new CancellationTokenSource())
@@ -118,8 +111,6 @@ namespace VolumeScanner2.ViewModels.Sections
 							_ctsCurrentScan = null;
 						}
 					}
-
-					IsScanning = false;
 				}
 				else
 				{
@@ -143,59 +134,9 @@ namespace VolumeScanner2.ViewModels.Sections
 			var rootFileInfo = new ZlpFileInfo(scanPath);
 			var rootNode = new FileInformationViewModel(rootFileInfo, cache);
 
-			FileInformationExpander.Expand(rootNode);
+			FileInformationExpander.ExpandFolder(rootNode, cache, 0);
 
 			return rootNode;
-		}
-
-		private void AddNodesRecursive(FileInformationViewModel currentNode, FileQueryCache cache, CancellationToken cancellationToken, Action progress)
-		{
-			cancellationToken.ThrowIfCancellationRequested();
-
-			var children = new Collection<FileInformationViewModel>();
-
-			if (currentNode.Type == FileInformationType.Directory)
-			{
-				var directoryInfo =  new ZlpDirectoryInfo(currentNode.FullPath);
-
-				foreach (var fileInfo in directoryInfo.GetFiles())
-				{
-					progress();
-					
-					long size;
-					size = cache.FileSizes.TryGetValue(fileInfo.FullName, out size) ? size : 0;
-					var localFile = new FileInformationViewModel(fileInfo, cache);
-
-					children.Add(localFile);
-					localFile.Size = new ByteSize(size);
-				}
-
-				foreach (var fileSystemInfo in directoryInfo.GetDirectories())
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-					try
-					{
-						var subNode = new FileInformationViewModel(new ZlpFileInfo(fileSystemInfo.FullName), cache);
-						children.Add(subNode);
-						AddNodesRecursive(subNode, cache, cancellationToken, progress);
-					}
-					catch (UnauthorizedAccessException e)
-					{
-						ExceptionMessages.Add($"Zugriff verweigert: {fileSystemInfo.FullName}");
-					}
-					catch (PathTooLongException e)
-					{
-						ExceptionMessages.Add($"Pfad zu lange: {fileSystemInfo.FullName}");
-					}
-					catch (Exception e)
-					{
-						ExceptionMessages.Add(e.Message);
-					}
-				}
-
-				currentNode.Children.AddRange(currentNode.Children.OrderByDescending(d => d.Size));
-				currentNode.Size = new ByteSize(children.Sum(s => s.Size.Bytes));
-			}
 		}
 
 		private string _scanPath;
@@ -213,63 +154,103 @@ namespace VolumeScanner2.ViewModels.Sections
 			get { return _source; }
 			set { SetValue(ref _source, value, nameof(Source)); }
 		}
-
-		private bool _isScanning;
-
-		public bool IsScanning
-		{
-			get { return _isScanning; }
-			set { SetValue(ref _isScanning, value, nameof(IsScanning)); }
-		}
 	}
 
 	internal class FileInformationExpander
 	{
-		public static void Expand(FileInformationViewModel refNode)
+		public static void ExpandFolder(FileInformationViewModel refNode, FileQueryCache cache, int depth)
 		{
-			Expand(refNode, 0);
-		}
+			if (refNode.Type == FileInformationType.Directory)
+			{
+				refNode.Size = cache.GetPathSize(refNode.FullPath);
 
-		private static void Expand(FileInformationViewModel refNode, int depth)
-		{
-			// easiest way to make sure we always create enough nodes to provide expandability on childnodes
-			if (depth >= 2)
-				return;
+				if (depth >= 2)
+					return;
 
+				var children = new Collection<FileInformationViewModel>();
+				var allFiles = ZlpIOHelper.GetFiles(refNode.FullPath);
+				var allFolders = ZlpIOHelper.GetDirectories(refNode.FullPath);
+				var nextDepth = ++depth;
+
+				foreach (var info in allFiles)
+				{
+					var node = new FileInformationViewModel(info, cache);
+					node.Size = cache.GetPathSize(info.FullName);
+					children.Add(node);
+				}
+
+				foreach (var info in allFolders)
+				{
+					var node = new FileInformationViewModel(new ZlpFileInfo(info.FullName), cache);
+					ExpandFolder(node, cache, nextDepth);
+					children.Add(node);
+				}
+
+				refNode.Children.Clear();
+				refNode.Children.AddRange(children.OrderByDescending(d => d.Size));
+			}
 		}
 	}
 
 	public class FileQueryCache
 	{
-		public readonly Dictionary<string, long> FileSizes = new Dictionary<string, long>();
+		public readonly Dictionary<string, long> SizesPerFile = new Dictionary<string, long>();
 		public readonly Dictionary<string, ZlpFileInfo> FileInformations = new Dictionary<string, ZlpFileInfo>();
-		public readonly Dictionary<string, List<string>> PathRegister = new Dictionary<string, List<string>>();
-		
+		public readonly Dictionary<string, Collection<string>> PathRegister = new Dictionary<string, Collection<string>>();
+		public readonly Dictionary<string, Collection<long>> SizesPerFolder = new Dictionary<string, Collection<long>>();
+		public readonly Dictionary<string, ByteSize> SizeOfItem = new Dictionary<string, ByteSize>();
+
+		public ByteSize GetPathSize(string path)
+		{
+			ByteSize folderSize;
+			return SizeOfItem.TryGetValue(path, out folderSize) ? folderSize : ByteSize.MinValue;
+		}
+
 		public void Create(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken)
 		{
 			var fileCount = filePaths.Count;
 			progress.Minimum = 0;
 			progress.Maximum = fileCount;
 
-			TimeSpan displayDelay = TimeSpan.FromMilliseconds(100);
+			TimeSpan displayDelay = TimeSpan.FromMilliseconds(250);
 
-			progress.SetTitle("1 / 3 - Dateien werden abgefragt.");
+			progress.SetTitle("1 / 4 - Dateien werden abgefragt.");
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
 				FileInformations.Add(path, new ZlpFileInfo(path));
 			});
 
-			progress.SetTitle("2 / 3 - Dateigrößen werden abgefragt.");
+			progress.SetTitle("2 / 4 - Dateigrößen werden abgefragt.");
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
-				FileSizes.Add(path, FileInformations[path].Length);
+				SizesPerFile.Add(path, FileInformations[path].Length);
 			});
 
-			progress.SetTitle("3 / 3 - Ordnergrößen werden berechnet.");
+			progress.SetTitle("3 / 4 - Ordnerhierarchieen werden registriert.");
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
-				RegisterPaths(path);
+				RegisterPathMembersAndSizes(path);
 			});
+
+			progress.SetTitle("4 / 4 - Ordnergrößen werden berechnet.");
+			CalculateItemSizes(progress, cancellationToken, displayDelay);
+		}
+
+		private void CalculateItemSizes(IProgressController progress, CancellationToken cancellationToken, TimeSpan displayDelay)
+		{
+			var itemCount = SizesPerFolder.Count;
+			var current = 0;
+			progress.Minimum = 0;
+			progress.Maximum = itemCount;
+
+			foreach (var pair in SizesPerFolder)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+				progress.SetMessage($"Ordner: {current} / {itemCount}", displayDelay);
+				progress.SetProgress(current, displayDelay);
+				SizeOfItem.Add(pair.Key, new ByteSize(pair.Value.Sum()));
+				current++;
+			}
 		}
 
 		private void IterateFiles(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken, int fileCount, TimeSpan displayDelay, Action<string> callback)
@@ -288,21 +269,30 @@ namespace VolumeScanner2.ViewModels.Sections
 			}
 		}
 
-		private void RegisterPaths(string filePath)
+		private void RegisterPathMembersAndSizes(string filePath)
 		{
 			var splittedDirectory = filePath.Split(Path.DirectorySeparatorChar);
+			var currentFileSize = SizesPerFile[filePath];
 
 			for (int i = 0; i < splittedDirectory.Length; i++)
 			{
 				var mergedPath = string.Join(Path.DirectorySeparatorChar.ToString(), splittedDirectory.Take(i + 1));
-				List<string> paths;
+				Collection<string> paths;
 				if (!PathRegister.TryGetValue(mergedPath, out paths))
 				{
-					paths = new List<string>();
+					paths = new Collection<string>();
 					PathRegister.Add(mergedPath, paths);
 				}
-
 				paths.Add(filePath);
+
+				Collection<long> folderMemberSizes;
+				if (!SizesPerFolder.TryGetValue(mergedPath, out folderMemberSizes))
+				{
+					folderMemberSizes = new Collection<long>();
+					SizesPerFolder.Add(mergedPath, folderMemberSizes);
+				}
+
+				folderMemberSizes.Add(currentFileSize);
 			}
 		}
 	}
