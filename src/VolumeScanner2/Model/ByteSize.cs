@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace VolumeScanner.BusinessObjects
+namespace VolumeScanner2.Model
 {
 	public struct ByteSize : IComparable<ByteSize>, IEquatable<ByteSize>
 	{

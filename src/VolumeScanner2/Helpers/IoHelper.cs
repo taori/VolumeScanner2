@@ -97,20 +97,12 @@ namespace VolumeScanner2.Helpers
 		private static string[] SafeGetFiles(string scanPath)
 		{
 			return ZetaLongPaths.ZlpIOHelper.GetFiles(scanPath, SearchOption.TopDirectoryOnly).Select(s => s.FullName).ToArray();
-//			return Directory.GetFiles(scanPath, "*", SearchOption.TopDirectoryOnly);
 		}
 
 		private static string[] SafeGetDirectories(string scanPath)
 		{
-//			Directory.SetCurrentDirectory(scanPath);
-//			var moddedPath = scanPath;
-			var moddedPath = "\\\\?\\UNC\\"+scanPath;
 
 			var directories = ZetaLongPaths.ZlpIOHelper.GetDirectories(scanPath).Select(s => s.FullName).ToArray();
-//			var directories = d.EnumerateDirectories().Select(s => s.FullName).ToArray();
-//			var directories = Directory.EnumerateDirectories(moddedPath).ToArray();
-//			var directories = Directory.GetDirectories(moddedPath, "*", SearchOption.TopDirectoryOnly);
-//			Directory.SetCurrentDirectory(prev);
 
 			return directories;
 		}

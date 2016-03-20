@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
 using Caliburn.Micro;
 using FontAwesome.WPF;
-using VolumeScanner.BusinessObjects;
 using VolumeScanner2.Caliburn;
+using VolumeScanner2.Model;
+using VolumeScanner2.ViewModels.Sections;
 using ZetaLongPaths;
 
 namespace VolumeScanner2.ViewModels
@@ -51,11 +53,15 @@ namespace VolumeScanner2.ViewModels
 	[DebuggerDisplay("{Name} {Size}")]
 	public class FileInformationViewModel : PropertyChangedValidationBase
 	{
-		public ZlpFileInfo FileInfo { get; }
+		public readonly FileQueryCache QueryInformation;
+
+		private readonly ZlpFileInfo _fileInfo;
 
 		public string FormattedSize => $"{Size.MegaBytes.ToString("00000.00")} MB";
 
 		public ByteSize Size { get; set; }
+
+		public string FullPath => _fileInfo.FullName;
 
 		private BindableCollection<FileInformationViewModel> _children = new BindableCollection<FileInformationViewModel>();
 
@@ -67,11 +73,12 @@ namespace VolumeScanner2.ViewModels
 
 		public FileInformationViewModel() {}
 
-		public FileInformationViewModel(ZlpFileInfo fi)
+		public FileInformationViewModel(ZlpFileInfo fileInformation, FileQueryCache queryInformation)
 		{
-			FileInfo = fi;
-			Type = File.GetAttributes(fi.FullName).HasFlag(FileAttributes.Directory) ? FileInformationType.Directory : FileInformationType.File;
-			Name = Path.GetFileName(FileInfo.FullName);
+			QueryInformation = queryInformation;
+			_fileInfo = fileInformation;
+			Type = File.GetAttributes(fileInformation.FullName).HasFlag(FileAttributes.Directory) ? FileInformationType.Directory : FileInformationType.File;
+			Name = Path.GetFileName(_fileInfo.FullName);
 		}
 
 		private FileInformationType _type;
@@ -100,7 +107,7 @@ namespace VolumeScanner2.ViewModels
 
 		public void OpenInExplorer()
 		{
-			System.Diagnostics.Process.Start("explorer", $"/e,/select,{FileInfo.FullName}");
+			System.Diagnostics.Process.Start("explorer", $"/e,/select,{_fileInfo.FullName}");
 		}
 
 		public void ExpandRecursive()

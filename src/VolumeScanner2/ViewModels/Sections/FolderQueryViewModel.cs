@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security.Permissions;
+using System.Security.Policy;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,12 +12,12 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using Caliburn.Micro;
-using VolumeScanner.BusinessObjects;
 using VolumeScanner2.Caliburn;
 using VolumeScanner2.Extensions;
 using VolumeScanner2.Framework;
 using VolumeScanner2.Helpers;
 using VolumeScanner2.Interfaces;
+using VolumeScanner2.Model;
 using VolumeScanner2.Resources;
 using ZetaLongPaths;
 using Action = System.Action;
@@ -125,7 +127,7 @@ namespace VolumeScanner2.ViewModels.Sections
 				}
 			}
 		}
-		
+
 		private FileInformationViewModel BuildRootNode(string scanPath, CancellationToken cancellationToken, IProgressController progress)
 		{
 			var filePaths = IoHelper.GetAllFilesRecursive(scanPath).ToList();
@@ -133,61 +135,38 @@ namespace VolumeScanner2.ViewModels.Sections
 			progress.Minimum = 0;
 			progress.Maximum = filePaths.Count;
 			progress.SetTitle("Dateigröße wird abgerufen.");
-			
-			var fileSizes = new Dictionary<string, long>();
-			var fileCount = filePaths.Count;
 
-			TimeSpan displayDelay = TimeSpan.FromMilliseconds(200);
+			FileQueryCache cache = new FileQueryCache();
 
-			for (int index = 0; index < fileCount; index++)
-			{
-				cancellationToken.ThrowIfCancellationRequested();
-
-				progress.SetMessage($"Datei: {index} / {fileCount}", displayDelay);
-				progress.SetProgress(index, displayDelay);
-				var filePath = filePaths[index];
-				if (!ZlpIOHelper.FileExists(filePath))
-					continue;
-					
-				fileSizes.Add(filePath, new ZlpFileInfo(filePath).Length);
-			}
-			
+			cache.Create(filePaths, progress, cancellationToken);
 
 			var rootFileInfo = new ZlpFileInfo(scanPath);
-			var rootNode = new FileInformationViewModel(rootFileInfo);
+			var rootNode = new FileInformationViewModel(rootFileInfo, cache);
 
-			int currentProgress = 0;
-			progress.SetTitle("Dateibaum wird aufgebaut.");
-			progress.SetProgress(0);
-			progress.Maximum = filePaths.Count;
-
-			var progressDelay = TimeSpan.FromMilliseconds(500);
-			AddNodesRecursive(rootNode, fileSizes, cancellationToken, () =>
-			{
-				progress.SetProgress(currentProgress++, progressDelay);
-				progress.SetMessage($"Datei {currentProgress} / {filePaths.Count}", progressDelay);
-			});
+			FileInformationExpander.Expand(rootNode);
 
 			return rootNode;
 		}
 
-		private void AddNodesRecursive(FileInformationViewModel currentNode, Dictionary<string, long> fileSizes, CancellationToken cancellationToken, Action progress)
+		private void AddNodesRecursive(FileInformationViewModel currentNode, FileQueryCache cache, CancellationToken cancellationToken, Action progress)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
+			var children = new Collection<FileInformationViewModel>();
+
 			if (currentNode.Type == FileInformationType.Directory)
 			{
-				var directoryInfo =  new ZlpDirectoryInfo(currentNode.FileInfo.FullName);
+				var directoryInfo =  new ZlpDirectoryInfo(currentNode.FullPath);
 
 				foreach (var fileInfo in directoryInfo.GetFiles())
 				{
 					progress();
 					
 					long size;
-					size = fileSizes.TryGetValue(fileInfo.FullName, out size) ? size : 0;
-					var localFile = new FileInformationViewModel(fileInfo);
+					size = cache.FileSizes.TryGetValue(fileInfo.FullName, out size) ? size : 0;
+					var localFile = new FileInformationViewModel(fileInfo, cache);
 
-					currentNode.Children.Add(localFile);
+					children.Add(localFile);
 					localFile.Size = new ByteSize(size);
 				}
 
@@ -196,14 +175,9 @@ namespace VolumeScanner2.ViewModels.Sections
 					cancellationToken.ThrowIfCancellationRequested();
 					try
 					{
-						var subNode = new FileInformationViewModel(new ZlpFileInfo(fileSystemInfo.FullName));
-						currentNode.Children.Add(subNode);
-						AddNodesRecursive(subNode, fileSizes, cancellationToken, progress);
-
-						var currentOrder = currentNode.Children.ToArray();
-
-						currentNode.Children.Clear();
-						currentNode.Children.AddRange(currentOrder.OrderByDescending(d => d.Size));
+						var subNode = new FileInformationViewModel(new ZlpFileInfo(fileSystemInfo.FullName), cache);
+						children.Add(subNode);
+						AddNodesRecursive(subNode, cache, cancellationToken, progress);
 					}
 					catch (UnauthorizedAccessException e)
 					{
@@ -219,7 +193,8 @@ namespace VolumeScanner2.ViewModels.Sections
 					}
 				}
 
-				currentNode.Size = new ByteSize(currentNode.Children.Sum(s => s.Size.Bytes));
+				currentNode.Children.AddRange(currentNode.Children.OrderByDescending(d => d.Size));
+				currentNode.Size = new ByteSize(children.Sum(s => s.Size.Bytes));
 			}
 		}
 
@@ -245,6 +220,90 @@ namespace VolumeScanner2.ViewModels.Sections
 		{
 			get { return _isScanning; }
 			set { SetValue(ref _isScanning, value, nameof(IsScanning)); }
+		}
+	}
+
+	internal class FileInformationExpander
+	{
+		public static void Expand(FileInformationViewModel refNode)
+		{
+			Expand(refNode, 0);
+		}
+
+		private static void Expand(FileInformationViewModel refNode, int depth)
+		{
+			// easiest way to make sure we always create enough nodes to provide expandability on childnodes
+			if (depth >= 2)
+				return;
+
+		}
+	}
+
+	public class FileQueryCache
+	{
+		public readonly Dictionary<string, long> FileSizes = new Dictionary<string, long>();
+		public readonly Dictionary<string, ZlpFileInfo> FileInformations = new Dictionary<string, ZlpFileInfo>();
+		public readonly Dictionary<string, List<string>> PathRegister = new Dictionary<string, List<string>>();
+		
+		public void Create(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken)
+		{
+			var fileCount = filePaths.Count;
+			progress.Minimum = 0;
+			progress.Maximum = fileCount;
+
+			TimeSpan displayDelay = TimeSpan.FromMilliseconds(100);
+
+			progress.SetTitle("1 / 3 - Dateien werden abgefragt.");
+			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
+			{
+				FileInformations.Add(path, new ZlpFileInfo(path));
+			});
+
+			progress.SetTitle("2 / 3 - Dateigrößen werden abgefragt.");
+			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
+			{
+				FileSizes.Add(path, FileInformations[path].Length);
+			});
+
+			progress.SetTitle("3 / 3 - Ordnergrößen werden berechnet.");
+			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
+			{
+				RegisterPaths(path);
+			});
+		}
+
+		private void IterateFiles(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken, int fileCount, TimeSpan displayDelay, Action<string> callback)
+		{
+			for (int index = 0; index < fileCount; index++)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				progress.SetMessage($"Datei: {index} / {fileCount}", displayDelay);
+				progress.SetProgress(index, displayDelay);
+				var filePath = filePaths[index];
+				if (!ZlpIOHelper.FileExists(filePath))
+					continue;
+
+				callback(filePath);
+			}
+		}
+
+		private void RegisterPaths(string filePath)
+		{
+			var splittedDirectory = filePath.Split(Path.DirectorySeparatorChar);
+
+			for (int i = 0; i < splittedDirectory.Length; i++)
+			{
+				var mergedPath = string.Join(Path.DirectorySeparatorChar.ToString(), splittedDirectory.Take(i + 1));
+				List<string> paths;
+				if (!PathRegister.TryGetValue(mergedPath, out paths))
+				{
+					paths = new List<string>();
+					PathRegister.Add(mergedPath, paths);
+				}
+
+				paths.Add(filePath);
+			}
 		}
 	}
 }
