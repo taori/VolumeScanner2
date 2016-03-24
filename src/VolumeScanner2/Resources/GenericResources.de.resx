@@ -117,58 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Button_NewQuery" xml:space="preserve">
-    <value>New folder query</value>
+  <data name="Option_Abort" xml:space="preserve">
+    <value>Abbrechen</value>
   </data>
-  <data name="Button_ViewSourceCode" xml:space="preserve">
-    <value>Show source code</value>
+  <data name="Option_No" xml:space="preserve">
+    <value>Nein</value>
   </data>
-  <data name="Dialog_NewQuery" xml:space="preserve">
-    <value>New query</value>
+  <data name="Option_Ok" xml:space="preserve">
+    <value>OK</value>
   </data>
-  <data name="Message_AnalysisRunning" xml:space="preserve">
-    <value>Analysis is running.</value>
+  <data name="Option_Yes" xml:space="preserve">
+    <value>Ja</value>
   </data>
-  <data name="Message_CalculatingFolderSizes" xml:space="preserve">
-    <value>4 / 4 - Calculating folder sizes.</value>
+  <data name="Title_Exception" xml:space="preserve">
+    <value>Unerwartete Ausnahme</value>
   </data>
-  <data name="Message_CollectingFileInformation" xml:space="preserve">
-    <value>1 / 4 - Collecting file information.</value>
+  <data name="Title_Information" xml:space="preserve">
+    <value>Information</value>
   </data>
-  <data name="Message_CreatingFolderRegister" xml:space="preserve">
-    <value>3 / 4 Creating folder register.</value>
-  </data>
-  <data name="Message_NoPathSelected" xml:space="preserve">
-    <value>No path selected.</value>
-  </data>
-  <data name="Message_QueryingFileSizes" xml:space="preserve">
-    <value>2 / 4 - Obtaining file sizes.</value>
-  </data>
-  <data name="Message_SearchAborted" xml:space="preserve">
-    <value>Search aborted</value>
-  </data>
-  <data name="Text_Evaluation" xml:space="preserve">
-    <value>Query: {0}</value>
-  </data>
-  <data name="Title_AnalysisCacheIsBeingBuilt" xml:space="preserve">
-    <value>Creating cache</value>
-  </data>
-  <data name="Title_QueryingPath" xml:space="preserve">
-    <value>Querying path information</value>
-  </data>
-  <data name="Token_File" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="Token_Folder" xml:space="preserve">
-    <value>Folder</value>
-  </data>
-  <data name="Tree_OpenInExplorer" xml:space="preserve">
-    <value>Open in explorer</value>
-  </data>
-  <data name="Tree_RecursiveCollapse" xml:space="preserve">
-    <value>Collapse recursive</value>
-  </data>
-  <data name="Tree_RecursiveExpand" xml:space="preserve">
-    <value>Expand recursive</value>
+  <data name="Title_Warning" xml:space="preserve">
+    <value>Warnung</value>
   </data>
 </root>

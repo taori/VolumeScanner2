@@ -13,9 +13,14 @@
 		d:DataContext="{d:DesignInstance Type=windows:ShellViewModel, IsDesignTimeCreatable=True}"
 		d:DesignHeight="300"
         Title="MainWindow" Height="700" Width="1024">
+	<controls:MetroWindow.RightWindowCommands>
+		<controls:WindowCommands>
+			<Button Foreground="Black" cal:Message.Attach="OpenSourceRepository" Content="{x:Static resources:ApplicationTranslations.Button_ViewSourceCode}" />
+		</controls:WindowCommands>
+	</controls:MetroWindow.RightWindowCommands>
 	<Border Padding="{StaticResource WindowPadding}" >
 		<DockPanel>
-			<Button DockPanel.Dock="Bottom" Content="{x:Static resources:ApplicationTranslations.ButtonNewQuery}" cal:Message.Attach="NewFolderQuery"></Button>
+			<Button DockPanel.Dock="Bottom" Content="{x:Static resources:ApplicationTranslations.Button_NewQuery}" cal:Message.Attach="NewFolderQuery"></Button>
 			<TabControl x:Name="Items" controls:TabControlHelper.IsUnderlined="True" Padding="0,5,0,5">
 				<TabControl.ItemTemplate>
 					<DataTemplate>

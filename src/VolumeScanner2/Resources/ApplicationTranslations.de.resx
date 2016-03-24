@@ -117,13 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TitleException" xml:space="preserve">
-    <value>Unerwartete Ausnahme</value>
+  <data name="Button_NewQuery" xml:space="preserve">
+    <value>Neue Ordnerabfrage</value>
   </data>
-  <data name="TitleInformation" xml:space="preserve">
-    <value>Information</value>
+  <data name="Button_ViewSourceCode" xml:space="preserve">
+    <value>Quellcode anzeigen</value>
   </data>
-  <data name="TitleWarning" xml:space="preserve">
-    <value>Warnung</value>
+  <data name="Dialog_NewQuery" xml:space="preserve">
+    <value>Neue Abfrage</value>
+  </data>
+  <data name="Message_AnalysisRunning" xml:space="preserve">
+    <value>Analyse läuft.</value>
+  </data>
+  <data name="Message_CalculatingFolderSizes" xml:space="preserve">
+    <value>4 / 4 - Ordnergrößen werden berechnet.</value>
+  </data>
+  <data name="Message_CollectingFileInformation" xml:space="preserve">
+    <value>1 / 4 - Informationen werden gesammelt.</value>
+  </data>
+  <data name="Message_CreatingFolderRegister" xml:space="preserve">
+    <value>3 / 4 Ordnerhierarchie wird erfasst.</value>
+  </data>
+  <data name="Message_NoPathSelected" xml:space="preserve">
+    <value>Kein Pfad ausgewählt</value>
+  </data>
+  <data name="Message_QueryingFileSizes" xml:space="preserve">
+    <value>2 / 4 - Dateigrößen werden abgefragt.</value>
+  </data>
+  <data name="Message_SearchAborted" xml:space="preserve">
+    <value>Suche abgebrochen</value>
+  </data>
+  <data name="Text_Evaluation" xml:space="preserve">
+    <value>Abfrage: {0}</value>
+  </data>
+  <data name="Title_AnalysisCacheIsBeingBuilt" xml:space="preserve">
+    <value>Cache wird erstellt</value>
+  </data>
+  <data name="Title_QueryingPath" xml:space="preserve">
+    <value>Pfadinformationen werden abgerufen</value>
+  </data>
+  <data name="Token_File" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Token_Folder" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
+  <data name="Tree_OpenInExplorer" xml:space="preserve">
+    <value>In Explorer öffnen</value>
+  </data>
+  <data name="Tree_RecursiveCollapse" xml:space="preserve">
+    <value>Rekursiv zusammenklappen</value>
+  </data>
+  <data name="Tree_RecursiveExpand" xml:space="preserve">
+    <value>Rekursiv aufklappen</value>
   </data>
 </root>

@@ -22,14 +22,14 @@ namespace VolumeScanner2.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class WindowResources {
+    public class GenericResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal WindowResources() {
+        internal GenericResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace VolumeScanner2.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("VolumeScanner2.Resources.WindowResources", typeof(WindowResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("VolumeScanner2.Resources.GenericResources", typeof(GenericResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,29 +61,65 @@ namespace VolumeScanner2.Resources {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Unerwartete Ausnahme ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Abort ähnelt.
         /// </summary>
-        public static string TitleException {
+        public static string Option_Abort {
             get {
-                return ResourceManager.GetString("TitleException", resourceCulture);
+                return ResourceManager.GetString("Option_Abort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die No ähnelt.
+        /// </summary>
+        public static string Option_No {
+            get {
+                return ResourceManager.GetString("Option_No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die OK ähnelt.
+        /// </summary>
+        public static string Option_Ok {
+            get {
+                return ResourceManager.GetString("Option_Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Yes ähnelt.
+        /// </summary>
+        public static string Option_Yes {
+            get {
+                return ResourceManager.GetString("Option_Yes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unexpected exception ähnelt.
+        /// </summary>
+        public static string Title_Exception {
+            get {
+                return ResourceManager.GetString("Title_Exception", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Information ähnelt.
         /// </summary>
-        public static string TitleInformation {
+        public static string Title_Information {
             get {
-                return ResourceManager.GetString("TitleInformation", resourceCulture);
+                return ResourceManager.GetString("Title_Information", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Warnung ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Warning ähnelt.
         /// </summary>
-        public static string TitleWarning {
+        public static string Title_Warning {
             get {
-                return ResourceManager.GetString("TitleWarning", resourceCulture);
+                return ResourceManager.GetString("Title_Warning", resourceCulture);
             }
         }
     }

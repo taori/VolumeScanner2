@@ -44,27 +44,27 @@ namespace VolumeScanner2
 		{
 			args.Handled = true;
 			var w = MainWindow as MetroWindow;
-			w.ShowMessageAsync(WindowResources.TitleException, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
+			w.ShowMessageAsync(GenericResources.Title_Exception, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
 		}
 
 		private void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs args)
 		{
 			args.SetObserved();
 			var w = MainWindow as MetroWindow;
-			w.ShowMessageAsync(WindowResources.TitleException, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
+			w.ShowMessageAsync(GenericResources.Title_Exception, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
 		}
 
 		private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs args)
 		{
 			var w = MainWindow as MetroWindow;
-			w.ShowMessageAsync(WindowResources.TitleException, args.ExceptionObject.ToString());
+			w.ShowMessageAsync(GenericResources.Title_Exception, args.ExceptionObject.ToString());
 		}
 
 		private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs args)
 		{
 			args.Handled = true;
 			var w = MainWindow as MetroWindow;
-			w.ShowMessageAsync(WindowResources.TitleException, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
+			w.ShowMessageAsync(GenericResources.Title_Exception, args.Exception.Message + Environment.NewLine + args.Exception.StackTrace);
 		}
 	}
 }

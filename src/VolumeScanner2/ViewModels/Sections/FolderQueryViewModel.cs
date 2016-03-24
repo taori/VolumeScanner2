@@ -64,7 +64,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 		private async void ScanPathExecute()
 		{
-			ScanPath = "Kein Pfad ausgewählt.";
+			ScanPath = ApplicationTranslations.Message_NoPathSelected;
 
 			using (var dialog = new FolderBrowserDialog())
 			{
@@ -86,7 +86,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 					using (var cts = new CancellationTokenSource())
 					{
-						var progressController = await this.ShowProgressAsync("Ordnergrößen werden abgerufen.", "Pfad wird analysiert.", cts);
+						var progressController = await this.ShowProgressAsync(ApplicationTranslations.Title_QueryingPath, ApplicationTranslations.Message_AnalysisRunning, cts);
 						_ctsCurrentScan = cts;
 
 						try
@@ -98,12 +98,12 @@ namespace VolumeScanner2.ViewModels.Sections
 						catch (OperationCanceledException e)
 						{
 							await progressController.CloseAsync();
-							await this.ShowMessageAsync(WindowResources.TitleInformation, "Suche abgebrochen");
+							await this.ShowMessageAsync(GenericResources.Title_Information, ApplicationTranslations.Message_SearchAborted);
 						}
 						catch (Exception e)
 						{
 							await progressController.CloseAsync();
-							await this.ShowMessageAsync(WindowResources.TitleException, e.Message);
+							await this.ShowMessageAsync(GenericResources.Title_Exception, e.Message);
 						}
 						finally
 						{
@@ -125,7 +125,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 			progress.Minimum = 0;
 			progress.Maximum = filePaths.Count;
-			progress.SetTitle("Dateigröße wird abgerufen.");
+			progress.SetTitle(ApplicationTranslations.Title_AnalysisCacheIsBeingBuilt);
 
 			FileQueryCache cache = new FileQueryCache();
 
@@ -214,25 +214,25 @@ namespace VolumeScanner2.ViewModels.Sections
 
 			TimeSpan displayDelay = TimeSpan.FromMilliseconds(250);
 
-			progress.SetTitle("1 / 4 - Dateien werden abgefragt.");
+			progress.SetTitle(ApplicationTranslations.Message_CollectingFileInformation);
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
 				FileInformations.Add(path, new ZlpFileInfo(path));
 			});
 
-			progress.SetTitle("2 / 4 - Dateigrößen werden abgefragt.");
+			progress.SetTitle(ApplicationTranslations.Message_QueryingFileSizes);
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
 				SizesPerFile.Add(path, FileInformations[path].Length);
 			});
 
-			progress.SetTitle("3 / 4 - Ordnerhierarchieen werden registriert.");
+			progress.SetTitle(ApplicationTranslations.Message_CreatingFolderRegister);
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
 				RegisterPathMembersAndSizes(path);
 			});
 
-			progress.SetTitle("4 / 4 - Ordnergrößen werden berechnet.");
+			progress.SetTitle(ApplicationTranslations.Message_CalculatingFolderSizes);
 			CalculateItemSizes(progress, cancellationToken, displayDelay);
 		}
 
@@ -246,7 +246,7 @@ namespace VolumeScanner2.ViewModels.Sections
 			foreach (var pair in SizesPerFolder)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
-				progress.SetMessage($"Ordner: {current} / {itemCount}", displayDelay);
+				progress.SetMessage($"{ApplicationTranslations.Token_Folder}: {current} / {itemCount}", displayDelay);
 				progress.SetProgress(current, displayDelay);
 				SizeOfItem.Add(pair.Key, new ByteSize(pair.Value.Sum()));
 				current++;
@@ -259,7 +259,7 @@ namespace VolumeScanner2.ViewModels.Sections
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
-				progress.SetMessage($"Datei: {index} / {fileCount}", displayDelay);
+				progress.SetMessage($"{ApplicationTranslations.Token_File}: {index} / {fileCount}", displayDelay);
 				progress.SetProgress(index, displayDelay);
 				var filePath = filePaths[index];
 				if (!ZlpIOHelper.FileExists(filePath))

@@ -15,7 +15,7 @@
              Background="{StaticResource WindowBackgroundBrush}"
              d:DesignHeight="300" d:DesignWidth="300">
 	<DockPanel>
-		<TextBlock FontWeight="Bold" DockPanel.Dock="Top" Text="{Binding Path=ScanPath, StringFormat={x:Static resources:ApplicationTranslations.TextEvaluation}}" Margin="4,0,0,4" />
+		<TextBlock FontWeight="Bold" DockPanel.Dock="Top" Text="{Binding Path=ScanPath, StringFormat={x:Static resources:ApplicationTranslations.Text_Evaluation}}" Margin="4,0,0,4" />
 		<ListView DockPanel.Dock="Top" ItemsSource="{Binding Path=ExceptionMessages}" MaxHeight="300">
 			<ListView.ItemTemplate>
 				<DataTemplate>
@@ -34,9 +34,9 @@
 					<WrapPanel>
 						<WrapPanel.ContextMenu>
 							<ContextMenu>
-								<MenuItem cal:Message.Attach="ExpandRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveExpand}" Visibility="Collapsed" />
-								<MenuItem cal:Message.Attach="CollapseRecursive" Header="{x:Static resources:ApplicationTranslations.TreeRecursiveCollapse}" />
-								<MenuItem cal:Message.Attach="OpenInExplorer" Header="{x:Static resources:ApplicationTranslations.TreeOpenInExplorer}" />
+								<MenuItem cal:Message.Attach="ExpandRecursive" Header="{x:Static resources:ApplicationTranslations.Tree_RecursiveExpand}" Visibility="Collapsed" />
+								<MenuItem cal:Message.Attach="CollapseRecursive" Header="{x:Static resources:ApplicationTranslations.Tree_RecursiveCollapse}" />
+								<MenuItem cal:Message.Attach="OpenInExplorer" Header="{x:Static resources:ApplicationTranslations.Tree_OpenInExplorer}" />
 							</ContextMenu>
 						</WrapPanel.ContextMenu>
 						<fa:ImageAwesome

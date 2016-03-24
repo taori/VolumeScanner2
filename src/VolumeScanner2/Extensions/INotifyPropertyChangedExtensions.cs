@@ -6,6 +6,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using VolumeScanner2.Interfaces;
 using VolumeScanner2.Proxies;
+using VolumeScanner2.Resources;
 
 namespace VolumeScanner2.Extensions
 {
@@ -22,8 +23,8 @@ namespace VolumeScanner2.Extensions
 		{
 			var window = App.Current.MainWindow as MetroWindow;
 			var dialogSettings = GetDefaultDialogSettings();
-			dialogSettings.NegativeButtonText = noText ?? "Nein";
-			dialogSettings.AffirmativeButtonText = yesText ?? "Ja";
+			dialogSettings.NegativeButtonText = noText ?? GenericResources.Option_No;
+			dialogSettings.AffirmativeButtonText = yesText ?? GenericResources.Option_Yes;
 			dialogSettings.DefaultButtonFocus = MessageDialogResult.Affirmative;
 
 			var result = await window.ShowMessageAsync(title, message, MessageDialogStyle.AffirmativeAndNegative, dialogSettings).ConfigureAwait(false);
@@ -34,9 +35,9 @@ namespace VolumeScanner2.Extensions
 		{
 			var window = App.Current.MainWindow as MetroWindow;
 			var dialogSettings = GetDefaultDialogSettings();
-			dialogSettings.NegativeButtonText = cancelText ?? "Abbruch";
-			dialogSettings.AffirmativeButtonText = yesText ?? "Ja";
-			dialogSettings.FirstAuxiliaryButtonText = noText ?? "Nein";
+			dialogSettings.NegativeButtonText = cancelText ?? GenericResources.Option_Abort;
+			dialogSettings.AffirmativeButtonText = yesText ?? GenericResources.Option_Yes;
+			dialogSettings.FirstAuxiliaryButtonText = noText ?? GenericResources.Option_No;
 			dialogSettings.DefaultButtonFocus = MessageDialogResult.FirstAuxiliary;
 
 			var result = await window.ShowMessageAsync(title, message, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, dialogSettings).ConfigureAwait(false);
@@ -59,7 +60,7 @@ namespace VolumeScanner2.Extensions
 		{
 			var window = App.Current.MainWindow as MetroWindow;
 			var dialogSettings = GetDefaultDialogSettings();
-			dialogSettings.AffirmativeButtonText = affirmativeText ?? "Ok";
+			dialogSettings.AffirmativeButtonText = affirmativeText ?? GenericResources.Option_Ok;
 
 			await window.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, dialogSettings).ConfigureAwait(false);
 		}

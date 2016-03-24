@@ -61,56 +61,164 @@ namespace VolumeScanner2.Resources {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Neue Ordnerabfrage ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die New folder query ähnelt.
         /// </summary>
-        public static string ButtonNewQuery {
+        public static string Button_NewQuery {
             get {
-                return ResourceManager.GetString("ButtonNewQuery", resourceCulture);
+                return ResourceManager.GetString("Button_NewQuery", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Neue Abfrage ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Show source code ähnelt.
         /// </summary>
-        public static string DialogNewQuery {
+        public static string Button_ViewSourceCode {
             get {
-                return ResourceManager.GetString("DialogNewQuery", resourceCulture);
+                return ResourceManager.GetString("Button_ViewSourceCode", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Abfrage: {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die New query ähnelt.
         /// </summary>
-        public static string TextEvaluation {
+        public static string Dialog_NewQuery {
             get {
-                return ResourceManager.GetString("TextEvaluation", resourceCulture);
+                return ResourceManager.GetString("Dialog_NewQuery", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die In Explorer öffnen ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Analysis is running. ähnelt.
         /// </summary>
-        public static string TreeOpenInExplorer {
+        public static string Message_AnalysisRunning {
             get {
-                return ResourceManager.GetString("TreeOpenInExplorer", resourceCulture);
+                return ResourceManager.GetString("Message_AnalysisRunning", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Rekursiv zusammenklappen ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die 4 / 4 - Calculating folder sizes. ähnelt.
         /// </summary>
-        public static string TreeRecursiveCollapse {
+        public static string Message_CalculatingFolderSizes {
             get {
-                return ResourceManager.GetString("TreeRecursiveCollapse", resourceCulture);
+                return ResourceManager.GetString("Message_CalculatingFolderSizes", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Rekursiv aufklappen ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 / 4 - Collecting file information. ähnelt.
         /// </summary>
-        public static string TreeRecursiveExpand {
+        public static string Message_CollectingFileInformation {
             get {
-                return ResourceManager.GetString("TreeRecursiveExpand", resourceCulture);
+                return ResourceManager.GetString("Message_CollectingFileInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 3 / 4 Creating folder register. ähnelt.
+        /// </summary>
+        public static string Message_CreatingFolderRegister {
+            get {
+                return ResourceManager.GetString("Message_CreatingFolderRegister", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die No path selected. ähnelt.
+        /// </summary>
+        public static string Message_NoPathSelected {
+            get {
+                return ResourceManager.GetString("Message_NoPathSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 2 / 4 - Obtaining file sizes. ähnelt.
+        /// </summary>
+        public static string Message_QueryingFileSizes {
+            get {
+                return ResourceManager.GetString("Message_QueryingFileSizes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Search aborted ähnelt.
+        /// </summary>
+        public static string Message_SearchAborted {
+            get {
+                return ResourceManager.GetString("Message_SearchAborted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Query: {0} ähnelt.
+        /// </summary>
+        public static string Text_Evaluation {
+            get {
+                return ResourceManager.GetString("Text_Evaluation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating cache ähnelt.
+        /// </summary>
+        public static string Title_AnalysisCacheIsBeingBuilt {
+            get {
+                return ResourceManager.GetString("Title_AnalysisCacheIsBeingBuilt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Querying path information ähnelt.
+        /// </summary>
+        public static string Title_QueryingPath {
+            get {
+                return ResourceManager.GetString("Title_QueryingPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File ähnelt.
+        /// </summary>
+        public static string Token_File {
+            get {
+                return ResourceManager.GetString("Token_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Folder ähnelt.
+        /// </summary>
+        public static string Token_Folder {
+            get {
+                return ResourceManager.GetString("Token_Folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Open in explorer ähnelt.
+        /// </summary>
+        public static string Tree_OpenInExplorer {
+            get {
+                return ResourceManager.GetString("Tree_OpenInExplorer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Collapse recursive ähnelt.
+        /// </summary>
+        public static string Tree_RecursiveCollapse {
+            get {
+                return ResourceManager.GetString("Tree_RecursiveCollapse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Expand recursive ähnelt.
+        /// </summary>
+        public static string Tree_RecursiveExpand {
+            get {
+                return ResourceManager.GetString("Tree_RecursiveExpand", resourceCulture);
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
@@ -34,10 +35,15 @@ namespace VolumeScanner2.ViewModels.Windows
 			set { }
 		}
 
+		public void OpenSourceRepository()
+		{		
+			Process.Start("explorer.exe", @"https://github.com/taori/VolumeScanner2");
+		}
+
 		public void NewFolderQuery()
 		{
 			var item = new FolderQueryViewModel();
-			item.DisplayName = ApplicationTranslations.DialogNewQuery;
+			item.DisplayName = ApplicationTranslations.Dialog_NewQuery;
 			this.Items.Add(item);
 
 			ActivateItem(item);

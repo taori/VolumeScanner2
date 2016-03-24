@@ -156,10 +156,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ApplicationTranslations.resx</DependentUpon>
     </Compile>
-    <Compile Include="Resources\WindowResources.Designer.cs">
+    <Compile Include="Resources\GenericResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>WindowResources.resx</DependentUpon>
+      <DependentUpon>GenericResources.resx</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\FileInformationViewModel.cs" />
     <Compile Include="ViewModels\Sections\FolderQueryViewModel.cs" />
@@ -209,13 +209,15 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ApplicationTranslations.de.resx" />
     <EmbeddedResource Include="Resources\ApplicationTranslations.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ApplicationTranslations.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\WindowResources.resx">
+    <EmbeddedResource Include="Resources\GenericResources.de.resx" />
+    <EmbeddedResource Include="Resources\GenericResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>WindowResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>GenericResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="packages.config" />
