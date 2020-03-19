@@ -1,22 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VolumeScanner2", "VolumeScanner2\VolumeScanner2.csproj", "{8B1449B0-5605-40D9-99E4-B2EC6D32075D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Debug|x64.ActiveCfg = Debug|x64
+		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Debug|x64.Build.0 = Debug|x64
 		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Release|x64.ActiveCfg = Release|x64
+		{8B1449B0-5605-40D9-99E4-B2EC6D32075D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9544828E-CCEB-486E-A9ED-F7DDB2F18868}
 	EndGlobalSection
 EndGlobal

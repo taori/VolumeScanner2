@@ -121,7 +121,7 @@ namespace VolumeScanner2.ViewModels.Sections
 
 		private FileInformationViewModel BuildRootNode(string scanPath, CancellationToken cancellationToken, IProgressController progress)
 		{
-			var filePaths = IoHelper.GetAllFilesRecursive(scanPath).ToList();
+			var filePaths = IoHelper.GetAllFilesRecursive(scanPath.AsMemory()).ToList();
 
 			progress.Minimum = 0;
 			progress.Maximum = filePaths.Count;
@@ -194,19 +194,20 @@ namespace VolumeScanner2.ViewModels.Sections
 
 	public class FileQueryCache
 	{
-		public readonly Dictionary<string, long> SizesPerFile = new Dictionary<string, long>();
-		public readonly Dictionary<string, ZlpFileInfo> FileInformations = new Dictionary<string, ZlpFileInfo>();
-		public readonly Dictionary<string, Collection<string>> PathRegister = new Dictionary<string, Collection<string>>();
-		public readonly Dictionary<string, Collection<long>> SizesPerFolder = new Dictionary<string, Collection<long>>();
-		public readonly Dictionary<string, ByteSize> SizeOfItem = new Dictionary<string, ByteSize>();
+		private readonly Dictionary<ReadOnlyMemory<char>, long> _sizesPerFile = new Dictionary<ReadOnlyMemory<char>, long>();
+		private readonly Dictionary<ReadOnlyMemory<char>, ZlpFileInfo> _fileInformations = new Dictionary<ReadOnlyMemory<char>, ZlpFileInfo>();
+		private readonly Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>> _pathRegister = new Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>>();
+		private readonly Dictionary<ReadOnlyMemory<char>, Collection<long>> _sizesPerFolder = new Dictionary<ReadOnlyMemory<char>, Collection<long>>();
+		private readonly Dictionary<ReadOnlyMemory<char>, ByteSize> _sizeOfItem = new Dictionary<ReadOnlyMemory<char>, ByteSize>();
+		private HashSet<ReadOnlyMemory<char>> _existingFiles = new HashSet<ReadOnlyMemory<char>>();
 
 		public ByteSize GetPathSize(string path)
 		{
 			ByteSize folderSize;
-			return SizeOfItem.TryGetValue(path, out folderSize) ? folderSize : ByteSize.MinValue;
+			return _sizeOfItem.TryGetValue(path.AsMemory(), out folderSize) ? folderSize : ByteSize.MinValue;
 		}
 
-		public void Create(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken)
+		public void Create(List<ReadOnlyMemory<char>> filePaths, IProgressController progress, CancellationToken cancellationToken)
 		{
 			var fileCount = filePaths.Count;
 			progress.Minimum = 0;
@@ -215,15 +216,18 @@ namespace VolumeScanner2.ViewModels.Sections
 			TimeSpan displayDelay = TimeSpan.FromMilliseconds(250);
 
 			progress.SetTitle(ApplicationTranslations.Message_CollectingFileInformation);
+			_existingFiles = new HashSet<ReadOnlyMemory<char>>(filePaths.Where(d => ZlpIOHelper.FileExists(d.ToString())));
+
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
-				FileInformations.Add(path, new ZlpFileInfo(path));
+				_fileInformations.Add(path, new ZlpFileInfo(path.ToString()));
 			});
 
 			progress.SetTitle(ApplicationTranslations.Message_QueryingFileSizes);
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
-				SizesPerFile.Add(path, FileInformations[path].Length);
+				var pathMemory = path;
+				_sizesPerFile.Add(pathMemory, _fileInformations[pathMemory].Length);
 			});
 
 			progress.SetTitle(ApplicationTranslations.Message_CreatingFolderRegister);
@@ -238,22 +242,22 @@ namespace VolumeScanner2.ViewModels.Sections
 
 		private void CalculateItemSizes(IProgressController progress, CancellationToken cancellationToken, TimeSpan displayDelay)
 		{
-			var itemCount = SizesPerFolder.Count;
+			var itemCount = _sizesPerFolder.Count;
 			var current = 0;
 			progress.Minimum = 0;
 			progress.Maximum = itemCount;
 
-			foreach (var pair in SizesPerFolder)
+			foreach (var pair in _sizesPerFolder)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 				progress.SetMessage($"{ApplicationTranslations.Token_Folder}: {current} / {itemCount}", displayDelay);
 				progress.SetProgress(current, displayDelay);
-				SizeOfItem.Add(pair.Key, new ByteSize(pair.Value.Sum()));
+				_sizeOfItem.Add(pair.Key, new ByteSize(pair.Value.Sum()));
 				current++;
 			}
 		}
 
-		private void IterateFiles(List<string> filePaths, IProgressController progress, CancellationToken cancellationToken, int fileCount, TimeSpan displayDelay, Action<string> callback)
+		private void IterateFiles(List<ReadOnlyMemory<char>> filePaths, IProgressController progress, CancellationToken cancellationToken, int fileCount, TimeSpan displayDelay, Action<ReadOnlyMemory<char>> callback)
 		{
 			for (int index = 0; index < fileCount; index++)
 			{
@@ -262,34 +266,34 @@ namespace VolumeScanner2.ViewModels.Sections
 				progress.SetMessage($"{ApplicationTranslations.Token_File}: {index} / {fileCount}", displayDelay);
 				progress.SetProgress(index, displayDelay);
 				var filePath = filePaths[index];
-				if (!ZlpIOHelper.FileExists(filePath))
+				if (!_existingFiles.Contains(filePath))
 					continue;
 
 				callback(filePath);
 			}
 		}
 
-		private void RegisterPathMembersAndSizes(string filePath)
+		private void RegisterPathMembersAndSizes(ReadOnlyMemory<char> filePath)
 		{
-			var splittedDirectory = filePath.Split(Path.DirectorySeparatorChar);
-			var currentFileSize = SizesPerFile[filePath];
+			var splittedDirectory = filePath.ToString().Split(Path.DirectorySeparatorChar);
+			var currentFileSize = _sizesPerFile[filePath];
 
 			for (int i = 0; i < splittedDirectory.Length; i++)
 			{
-				var mergedPath = string.Join(Path.DirectorySeparatorChar.ToString(), splittedDirectory.Take(i + 1));
-				Collection<string> paths;
-				if (!PathRegister.TryGetValue(mergedPath, out paths))
+				var mergedPath = string.Join(Path.DirectorySeparatorChar.ToString(), splittedDirectory.Take(i + 1)).AsMemory();
+				Collection<ReadOnlyMemory<char>> paths;
+				if (!_pathRegister.TryGetValue(mergedPath, out paths))
 				{
-					paths = new Collection<string>();
-					PathRegister.Add(mergedPath, paths);
+					paths = new Collection<ReadOnlyMemory<char>>();
+					_pathRegister.Add(mergedPath, paths);
 				}
 				paths.Add(filePath);
 
 				Collection<long> folderMemberSizes;
-				if (!SizesPerFolder.TryGetValue(mergedPath, out folderMemberSizes))
+				if (!_sizesPerFolder.TryGetValue(mergedPath, out folderMemberSizes))
 				{
 					folderMemberSizes = new Collection<long>();
-					SizesPerFolder.Add(mergedPath, folderMemberSizes);
+					_sizesPerFolder.Add(mergedPath, folderMemberSizes);
 				}
 
 				folderMemberSizes.Add(currentFileSize);

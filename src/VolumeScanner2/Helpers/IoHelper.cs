@@ -46,9 +46,9 @@ namespace VolumeScanner2.Helpers
 			});
 		}
 
-		public static IEnumerable<string> GetAllDirectoriesRecursive(string scanPath)
+		public static IEnumerable<ReadOnlyMemory<char>> GetAllDirectoriesRecursive(ReadOnlyMemory<char> scanPath)
 		{
-			string[] directories;
+			ReadOnlyMemory<char>[] directories;
 			try
 			{
 				directories = SafeGetDirectories(scanPath);
@@ -68,9 +68,9 @@ namespace VolumeScanner2.Helpers
 			}
 		}
 
-		public static IEnumerable<string> GetAllFilesRecursive(string scanPath)
+		public static IEnumerable<ReadOnlyMemory<char>> GetAllFilesRecursive(ReadOnlyMemory<char> scanPath)
 		{
-			string[] directories;
+			ReadOnlyMemory<char>[] directories;
 			try
 			{
 				directories = SafeGetDirectories(scanPath);
@@ -94,15 +94,14 @@ namespace VolumeScanner2.Helpers
 			}
 		}
 
-		private static string[] SafeGetFiles(string scanPath)
+		private static ReadOnlyMemory<char>[] SafeGetFiles(ReadOnlyMemory<char> scanPath)
 		{
-			return ZetaLongPaths.ZlpIOHelper.GetFiles(scanPath, SearchOption.TopDirectoryOnly).Select(s => s.FullName).ToArray();
+			return ZetaLongPaths.ZlpIOHelper.GetFiles(scanPath.ToString(), SearchOption.TopDirectoryOnly).Select(s => s.FullName.AsMemory()).ToArray();
 		}
 
-		private static string[] SafeGetDirectories(string scanPath)
+		private static ReadOnlyMemory<char>[] SafeGetDirectories(ReadOnlyMemory<char> scanPath)
 		{
-
-			var directories = ZetaLongPaths.ZlpIOHelper.GetDirectories(scanPath).Select(s => s.FullName).ToArray();
+			var directories = ZetaLongPaths.ZlpIOHelper.GetDirectories(scanPath.ToString()).Select(s => s.FullName.AsMemory()).ToArray();
 
 			return directories;
 		}
