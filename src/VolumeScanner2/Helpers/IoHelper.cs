@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ZetaLongPaths;
 
 namespace VolumeScanner2.Helpers
 {
@@ -23,6 +24,22 @@ namespace VolumeScanner2.Helpers
 			if (subFolder == SpecialFolder.None)
 				return Path.Combine(sf, RoamingRootName);
 			return Path.Combine(sf, RoamingRootName, subFolder.ToString());
+		}
+
+		public static bool FileExists(ReadOnlyMemory<char> path)
+		{
+			if (path.Length < 260)
+				return File.Exists(path.ToString());
+
+			return ZlpIOHelper.FileExists(path.ToString());
+		}
+
+		public static long FileSize(ReadOnlyMemory<char> path)
+		{
+			if (path.Length < 260)
+				return new FileInfo(path.ToString()).Length;
+
+			return ZlpIOHelper.GetFileLength(path.ToString());
 		}
 
 		public static string GetFileName(SpecialFolder folder, string fileName)

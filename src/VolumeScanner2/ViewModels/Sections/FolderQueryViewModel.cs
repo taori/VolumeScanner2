@@ -194,12 +194,28 @@ namespace VolumeScanner2.ViewModels.Sections
 
 	public class FileQueryCache
 	{
-		private readonly Dictionary<ReadOnlyMemory<char>, long> _sizesPerFile = new Dictionary<ReadOnlyMemory<char>, long>();
-		private readonly Dictionary<ReadOnlyMemory<char>, ZlpFileInfo> _fileInformations = new Dictionary<ReadOnlyMemory<char>, ZlpFileInfo>();
-		private readonly Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>> _pathRegister = new Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>>();
-		private readonly Dictionary<ReadOnlyMemory<char>, Collection<long>> _sizesPerFolder = new Dictionary<ReadOnlyMemory<char>, Collection<long>>();
-		private readonly Dictionary<ReadOnlyMemory<char>, ByteSize> _sizeOfItem = new Dictionary<ReadOnlyMemory<char>, ByteSize>();
-		private HashSet<ReadOnlyMemory<char>> _existingFiles = new HashSet<ReadOnlyMemory<char>>();
+		private class MemoryComparer : IEqualityComparer<ReadOnlyMemory<char>>
+		{
+			/// <inheritdoc />
+			public bool Equals(ReadOnlyMemory<char> x, ReadOnlyMemory<char> y)
+			{
+				var same = x.GetHashCode() == y.GetHashCode();
+				return same;
+			}
+
+			/// <inheritdoc />
+			public int GetHashCode(ReadOnlyMemory<char> obj)
+			{
+				return obj.GetHashCode();
+			}
+		}
+
+		private static readonly MemoryComparer Comparer = new MemoryComparer();
+		private readonly Dictionary<ReadOnlyMemory<char>, long> _sizesPerFile = new Dictionary<ReadOnlyMemory<char>, long>(Comparer);
+		private readonly Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>> _pathRegister = new Dictionary<ReadOnlyMemory<char>, Collection<ReadOnlyMemory<char>>>(Comparer);
+		private readonly Dictionary<ReadOnlyMemory<char>, Collection<long>> _sizesPerFolder = new Dictionary<ReadOnlyMemory<char>, Collection<long>>(Comparer);
+		private readonly Dictionary<ReadOnlyMemory<char>, ByteSize> _sizeOfItem = new Dictionary<ReadOnlyMemory<char>, ByteSize>(Comparer);
+		private HashSet<ReadOnlyMemory<char>> _existingFiles = new HashSet<ReadOnlyMemory<char>>(Comparer);
 
 		public ByteSize GetPathSize(string path)
 		{
@@ -213,21 +229,18 @@ namespace VolumeScanner2.ViewModels.Sections
 			progress.Minimum = 0;
 			progress.Maximum = fileCount;
 
-			TimeSpan displayDelay = TimeSpan.FromMilliseconds(250);
+			var displayDelay = TimeSpan.FromMilliseconds(250);
 
 			progress.SetTitle(ApplicationTranslations.Message_CollectingFileInformation);
-			_existingFiles = new HashSet<ReadOnlyMemory<char>>(filePaths.Where(d => ZlpIOHelper.FileExists(d.ToString())));
-
-			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
-			{
-				_fileInformations.Add(path, new ZlpFileInfo(path.ToString()));
-			});
-
+			_existingFiles = new HashSet<ReadOnlyMemory<char>>(filePaths.Where(d => IoHelper.FileExists(d)));
+			
 			progress.SetTitle(ApplicationTranslations.Message_QueryingFileSizes);
 			IterateFiles(filePaths, progress, cancellationToken, fileCount, displayDelay, path =>
 			{
-				var pathMemory = path;
-				_sizesPerFile.Add(pathMemory, _fileInformations[pathMemory].Length);
+				if (_sizesPerFile.ContainsKey(path))
+					return;
+
+				_sizesPerFile.Add(path, IoHelper.FileSize(path));
 			});
 
 			progress.SetTitle(ApplicationTranslations.Message_CreatingFolderRegister);
